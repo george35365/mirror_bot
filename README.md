@@ -90,34 +90,48 @@ sudo docker build . -t mirror-bot
 ```
 sudo docker run mirror-bot
 ```
-
-# Using service accounts for uploading to avoid user rate limit
-For Service Account to work, you must set USE_SERVICE_ACCOUNTS="True" in config file or environment variables
-Many thanks to [AutoRClone](https://github.com/xyou365/AutoRclone) for the scripts
-## Generating service accounts
-Step 1. Generate service accounts [What is service account](https://cloud.google.com/iam/docs/service-accounts)
----------------------------------
-Let us create only the service accounts that we need. 
-**Warning:** abuse of this feature is not the aim of autorclone and we do **NOT** recommend that you make a lot of projects, just one project and 100 sa allow you plenty of use, its also possible that overabuse might get your projects banned by google. 
-
+# Deploying On Heroku :-
+#Deploying on Heroku
+- First Run Bot locally on your computer i.e: Do above steps and get G-Drive Token File( token.pickle )
+- Change Bot Download Dir to /bot/downloads in config.ini file.
+- Install [Heroku cli](https://devcenter.heroku.com/articles/heroku-cli)
+- Login into your heroku account with command:
 ```
-Note: 1 service account can copy around 750gb a day, 1 project makes 100 service accounts so thats 75tb a day, for most users this should easily suffice. 
+heroku login
+```
+- Create a new heroku app:
+```
+heroku create appname	
+```
+- Select This App in your Heroku-cli: 
+```
+heroku git:remote -a appname
+```
+- Change Dyno Stack to a Docker Container:
+```
+heroku stack:set container
+```
+- Add Private Credentials and Config Stuff:
+```
+git add . --force
+```
+- Commit new changes:
+```
+git commit -m "Initial Commit"
+```
+- Push Code to Heroku:
+```
+git push heroku master --force
+```
+- Restart Worker by these commands:
+```
+heroku ps:scale worker=0
+```
+```
+heroku ps:scale worker=1	
 ```
 
-`python3 gen_sa_accounts.py --quick-setup 1 --new-only`
-
-A folder named accounts will be created which will contain keys for the service accounts created
-
-NOTE: If you have created SAs in past from this script, you can also just re download the keys by running:
-```
-python3 gen_sa_accounts.py --download-keys project_id
-```
-
-### Add all the service accounts to the Team Drive or folder
-- Run:
-```
-python3 add_to_team_drive.py -d SharedTeamDriveSrcID
-```
+Heroku-Note: Doing authorizations ( /authorize command ) through telegram wont be permanent as heroku uses ephemeral filesystem. They will be reset on each dyno boot.
 
 # Youtube-dl authentication using .netrc file
 For using your premium accounts in youtube-dl, edit the netrc file (in the root directory of this repository) according to following format:
